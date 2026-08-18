@@ -1,13 +1,19 @@
 accounts = {
 }
 
-id = 1
 
-def add_password():
+def add_password(service, username, password):
+    if not accounts:
+        accounts[1] = {"Service": service, "Username": username, "Password": password}
+    else:
+        accounts[max(accounts) + 1] = {"Service": service, "Username": username, "Password": password}
+
+
+def ask_password_data():
     service = str(input("Which service: "))
     username = str(input("What is your username: "))
     password = str(input("What is your password: "))
-    accounts[id] = {"Service": service, "Username": username, "Password": password}
+    return service, username, password
 
 def delete_password():
     del_password_id = int(input("The ID of the password you want to delete: "))
@@ -60,7 +66,8 @@ while True:
     choice = input("\nChoose an option: ")
 
     if choice == "1":
-        add_password()
+        service, username, password = ask_password_data()
+        add_password(service, username, password)
     elif choice == "2":
         show_passwords()
     elif choice == "3":
