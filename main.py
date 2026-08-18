@@ -1,13 +1,25 @@
-accounts = {
-}
+import sqlite3 as sql
+
+connection = sql.connect("data.db")
+cursor = connection.cursor()
+
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS ACCOUNTS (
+ID INTEGER NOT NULL PRIMARY KEY,
+SERVICE TEXT NOT NULL,
+USERNAME TEXT NOT NULL,
+PASSWORD TEXT NOT NULL)
+''')
+
+connection.commit()
 
 
 def add_password(service, username, password):
-    if not accounts:
-        accounts[1] = {"Service": service, "Username": username, "Password": password}
-    else:
-        accounts[max(accounts) + 1] = {"Service": service, "Username": username, "Password": password}
-
+    cursor.execute("""
+        INSERT INTO ACCOUNTS (SERVICE, USERNAME, PASSWORD)
+        VALUES (?, ?, ?)
+    """, (service, username, password))
+    connection.commit()
 
 def ask_password_data():
     service = input("Which service: ")
@@ -16,17 +28,19 @@ def ask_password_data():
     return service, username, password
 
 def delete_password(del_password_id):
-    if del_password_id in accounts:
-        del accounts[del_password_id]
-    else:
-        print("That is not a valid ID!")
+    cursor.execute("""
+            DELETE FROM ACCOUNTS WHERE ID = ?
+        """, (del_password_id,))
+    connection.commit()
 
 def show_passwords():
-    for account_id, info in accounts.items():
-        print(f"Account ID: {account_id}")
-        print(f"Service: {info['Service']}")
-        print(f"Username: {info['Username']}")
-        print(f"Password: {info['Password']}")
+    result = cursor.execute('''
+    SELECT * FROM ACCOUNTS
+    ''').fetchall()
+
+    for account in result:
+        account_id, service, username, password = account
+        print(f"ID: {account_id}, Service: {service}, Username: {username}, Password: {password}")
 
 def edit_password(edit_password_id):
     while True:
@@ -37,17 +51,33 @@ def edit_password(edit_password_id):
         edit_password_choice = input("What do you want to edit? ")
         if edit_password_choice == "1":
             value_after_edit = input("What do you want the service to change to: ")
-            accounts[edit_password_id]["Service"] = value_after_edit
+            cursor.execute("""
+                        UPDATE ACCOUNTS SET SERVICE = ? WHERE ID = ?
+                    """, (value_after_edit, edit_password_id))
+            connection.commit()
         elif edit_password_choice == "2":
             value_after_edit = input("What do you want the Username to change to: ")
-            accounts[edit_password_id]["Username"] = value_after_edit
+            cursor.execute("""
+                                    UPDATE ACCOUNTS SET USERNAME = ? WHERE ID = ?
+                                """, (value_after_edit, edit_password_id))
+            connection.commit()
         elif edit_password_choice == "3":
             value_after_edit = input("What do you want the password to change to: ")
-            accounts[edit_password_id]["Password"] = value_after_edit
+            cursor.execute("""
+                                    UPDATE ACCOUNTS SET PASSWORD = ? WHERE ID = ?
+                                """, (value_after_edit, edit_password_id))
+            connection.commit()
         elif edit_password_choice == "4":
             return
         else:
             print("That is not a valid choice!")
+
+def account_exists(account_id):
+    result = cursor.execute(
+        "SELECT ID FROM ACCOUNTS WHERE ID = ?",
+        (account_id,)
+    ).fetchone()
+    return result is not None
 
 while True:
     print("---( Password Manager )---")
@@ -68,14 +98,17 @@ while True:
     elif choice == "3":
         try:
             del_password_id = int(input("The ID of the password you want to delete: "))
-            delete_password(del_password_id)
+            if account_exists(del_password_id):
+                delete_password(del_password_id)
+            else:
+                print("That is not a valid ID!")
         except ValueError:
             print("That is not a valid ID!")
 
     elif choice == "4":
         try:
             edit_password_id = int(input("The ID of the password you want to edit: "))
-            if edit_password_id in accounts:
+            if account_exists(edit_password_id):
                 edit_password(edit_password_id)
             else:
                 print("That is not a valid ID!")
