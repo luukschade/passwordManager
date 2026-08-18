@@ -10,16 +10,15 @@ def add_password(service, username, password):
 
 
 def ask_password_data():
-    service = str(input("Which service: "))
-    username = str(input("What is your username: "))
-    password = str(input("What is your password: "))
+    service = input("Which service: ")
+    username = input("What is your username: ")
+    password = input("What is your password: ")
     return service, username, password
 
-def delete_password():
-    del_password_id = int(input("The ID of the password you want to delete: "))
-    try:
+def delete_password(del_password_id):
+    if del_password_id in accounts:
         del accounts[del_password_id]
-    except KeyError:
+    else:
         print("That is not a valid ID!")
 
 def show_passwords():
@@ -29,32 +28,26 @@ def show_passwords():
         print(f"Username: {info['Username']}")
         print(f"Password: {info['Password']}")
 
-def edit_password():
+def edit_password(edit_password_id):
     while True:
-        edit_password_id = int(input("The ID of the password you want to edit: "))
-        try:
-            while True:
-                print("1. Service")
-                print("2. Username")
-                print("3. Password")
-                print("4. Quit")
-                edit_password_choice = input("What do you want to edit? ")
-                if edit_password_choice == "1":
-                    value_after_edit = input("What do you want the service to change to: ")
-                    accounts[edit_password_id]["Service"] = value_after_edit
-                elif edit_password_choice == "2":
-                    value_after_edit = input("What do you want the Username to change to: ")
-                    accounts[edit_password_id]["Username"] = value_after_edit
-                elif edit_password_choice == "3":
-                    value_after_edit = input("What do you want the password to change to: ")
-                    accounts[edit_password_id]["Password"] = value_after_edit
-                elif edit_password_choice == "4":
-                    return
-                else:
-                    print("That is not a valid choice!")
-        except KeyError:
-            print("That is not a valid ID!")
+        print("1. Service")
+        print("2. Username")
+        print("3. Password")
+        print("4. Quit")
+        edit_password_choice = input("What do you want to edit? ")
+        if edit_password_choice == "1":
+            value_after_edit = input("What do you want the service to change to: ")
+            accounts[edit_password_id]["Service"] = value_after_edit
+        elif edit_password_choice == "2":
+            value_after_edit = input("What do you want the Username to change to: ")
+            accounts[edit_password_id]["Username"] = value_after_edit
+        elif edit_password_choice == "3":
+            value_after_edit = input("What do you want the password to change to: ")
+            accounts[edit_password_id]["Password"] = value_after_edit
+        elif edit_password_choice == "4":
             return
+        else:
+            print("That is not a valid choice!")
 
 while True:
     print("---( Password Manager )---")
@@ -68,12 +61,27 @@ while True:
     if choice == "1":
         service, username, password = ask_password_data()
         add_password(service, username, password)
+
     elif choice == "2":
         show_passwords()
+
     elif choice == "3":
-        delete_password()
+        try:
+            del_password_id = int(input("The ID of the password you want to delete: "))
+            delete_password(del_password_id)
+        except ValueError:
+            print("That is not a valid ID!")
+
     elif choice == "4":
-        edit_password()
+        try:
+            edit_password_id = int(input("The ID of the password you want to edit: "))
+            if edit_password_id in accounts:
+                edit_password(edit_password_id)
+            else:
+                print("That is not a valid ID!")
+        except ValueError:
+            print("That is not a valid ID!")
+
     elif choice == "5":
         break
     else:
