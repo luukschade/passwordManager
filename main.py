@@ -48,29 +48,26 @@ def edit_password(edit_password_id):
         print("2. Username")
         print("3. Password")
         print("4. Quit")
-        edit_password_choice = input("What do you want to edit? ")
-        if edit_password_choice == "1":
-            value_after_edit = input("What do you want the service to change to: ")
-            cursor.execute("""
-                        UPDATE ACCOUNTS SET SERVICE = ? WHERE ID = ?
-                    """, (value_after_edit, edit_password_id))
-            connection.commit()
-        elif edit_password_choice == "2":
-            value_after_edit = input("What do you want the Username to change to: ")
-            cursor.execute("""
-                                    UPDATE ACCOUNTS SET USERNAME = ? WHERE ID = ?
-                                """, (value_after_edit, edit_password_id))
-            connection.commit()
-        elif edit_password_choice == "3":
-            value_after_edit = input("What do you want the password to change to: ")
-            cursor.execute("""
-                                    UPDATE ACCOUNTS SET PASSWORD = ? WHERE ID = ?
-                                """, (value_after_edit, edit_password_id))
-            connection.commit()
-        elif edit_password_choice == "4":
+
+        choice = input("What do you want to edit? ")
+
+        if choice == "1":
+            column = "SERVICE"
+        elif choice == "3":
+            column = "PASSWORD"
+        elif choice == "4":
             return
         else:
             print("That is not a valid choice!")
+            continue
+
+        value = input("What do you want to change it to: ")
+
+        cursor.execute(
+            f"UPDATE ACCOUNTS SET {column} = ? WHERE ID = ?",
+            (value, edit_password_id)
+        )
+        connection.commit()
 
 def account_exists(account_id):
     result = cursor.execute(
